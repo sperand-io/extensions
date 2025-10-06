@@ -70,7 +70,7 @@ function parseTOML(content: string): { config?: AppConfig; error?: string } {
 export function getConfigPath(): { configPath: string } {
   const args = ["config", "--config-path"];
   let configPath = spawnSync("aerospace", args, {
-    env: env(),
+    env: env().env,
     encoding: "utf8",
     timeout: 15000,
   }).stdout.trim();

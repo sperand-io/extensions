@@ -15,7 +15,13 @@ interface Window {
 
 export interface Windows extends Array<Window> {}
 
-let cachedEnv: Record<string, string> | null = null;
+interface EnvType {
+  env: Record<string, string>;
+  cwd: string;
+  shell: string;
+}
+
+let cachedEnv: null | EnvType = null;
 
 export function env() {
   if (cachedEnv) {
@@ -24,13 +30,17 @@ export function env() {
 
   const env = shellEnvSync();
 
-  cachedEnv = env;
+  cachedEnv = {
+    env: env,
+    cwd: env.HOME || `/Users/${process.env.USER}`,
+    shell: env.SHELL,
+  };
   return cachedEnv;
-}
+};
 
 async function getAppPath(bundleId: string) {
   const appPath = spawnSync("mdfind", [`kMDItemCFBundleIdentifier="${bundleId}"`], {
-    env: env(),
+    env: env().env,
     encoding: "utf8",
     timeout: 15000,
   });
@@ -48,7 +58,7 @@ export async function getWindows(workspace: string) {
   ];
 
   const aerospaceArr = spawnSync("aerospace", args, {
-    env: env(),
+    env: env().env,
     encoding: "utf8",
     timeout: 15000,
   });
@@ -72,7 +82,7 @@ export async function getWindows(workspace: string) {
 
 export function focusWindow(windowId: string) {
   spawnSync("aerospace", ["focus", "--window-id", `${windowId}`], {
-    env: env(),
+    env: env().env,
     encoding: "utf8",
     timeout: 15000,
   });
